@@ -1,0 +1,76 @@
+.charts-tooltip {
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #08e2ff;
+    float: left;
+    margin: 5px 5px 0 0;
+  }
+  p:last-child i{
+    background: #0b6fff;
+  }
+}
+.legend {
+  position: absolute;
+  top: 0;
+  left: 30px;
+  color: #fff;
+  li {
+    float: left;
+    margin-right: 20px;
+    cursor: pointer;
+    &:nth-child(1){
+     i{
+        border: 1px solid #ffe003;
+      }
+      em {
+        background: #ffe003;
+      }
+      
+    }
+    &:nth-child(2){
+      i{
+        border: 1px solid #08e2ff;
+      }
+      em {
+        background: #08e2ff;
+      }
+    }
+    &:nth-child(3){
+      i{
+        border: 1px solid #0b6fff;
+      }
+      em {
+        background: #0b6fff;
+      }
+    }
+    i {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      border-radius: 50%;
+      border: 1px solid #ffe003;
+      float: left;
+      margin: 0 10px 0 0;
+      
+      em {
+        background: #ffe003;
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        border-radius: 50%;
+        margin-left: 4px;
+      }
+    }
+  }
+  li.invalid {
+    i {
+      border: 1px solid #d7d7d7;
+    }
+    em {
+      background: #d7d7d7;
+    }
+  }
+}

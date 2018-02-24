@@ -1,0 +1,4 @@
+<p class="name">{{name}}</p>
+{{#each values}}
+  <p><i></i>{{this}}</p>
+{{/each}}

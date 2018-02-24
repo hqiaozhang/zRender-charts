@@ -1,0 +1,327 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2018-01-08 11:48:52
+ * @Description: 同环比图表
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2018-01-08 11:48:52
+ */
+
+import './index.css'
+import $ from 'jquery'
+import zrender from 'zrender'
+import _ from 'lodash'
+import { YAxis, XAxis } from '../../util/axis'
+import { zrenderInit } from '../../util/initZr'
+import { showTips, hideTips } from './tips.js'
+import iconUrl from './images/icon.png'
+import Legend from './legend.js'
+
+export default class SameRingRation {
+  /**
+   * 图表默认配置项
+   * @return {object} 默认配置项
+   */
+  defaultSetting () {
+    return{
+      width: 600,
+      height: 300,
+      tooltip: {
+        show: true
+      },
+      // 图例配置项
+      legend: {
+        show: true,
+        name: ['趋势', '同比', '环比']
+      },
+      // 图表配置项
+      itemStyle: {
+        width: 15,
+        radius: 10,
+        fill: ['#ffe003', '#08e2ff', '#0b6fff'], // 趋势、同比、环比
+        margin: {
+          top: 30,
+          right: 50,
+          bottom: 20,
+          left: 50
+        }
+      },
+      // Y轴配置项
+      yAxis: {
+        position: 'right',
+        format: '%'
+      }
+    }  
+  }
+
+  /**
+   * Creates an instance of Heatmap
+   * @param {string} selector 容器元素选择器
+   * @param {object} opt 图表组件配置项
+   */
+  constructor(selector, opt) {
+    this.selector = selector
+    const defaultSetting = this.defaultSetting()
+    this.config = _.merge({}, defaultSetting, opt)
+    const { width, height, itemStyle, tooltip, legend } = this.config
+    const { top, right, bottom, left } = itemStyle.margin
+    this.config.xWidth = width - left - right
+    this.config.yHeight = height - top - bottom
+    this.zr = zrenderInit(selector, width, height)
+    // 是否需提示框 
+    if(tooltip.show) {
+      $(selector).append('<div class="charts-tooltip"></div>')
+    }
+    // 实例化左边Y轴 
+    this.lYAxis = new YAxis(this.zr, this.config)
+    // 右边Y轴配置项
+    this.config.yAxis = {position: 'left', format: ''}
+    // 实例化右边Y轴
+    this.rYAxis = new YAxis(this.zr, this.config)
+    // 实例化X轴
+    this.xAxis = new XAxis(this.zr, this.config)
+    let legendData = []
+    // 是否显示图例
+    if(legend.show){
+      // 图例数据
+      legend.name.map((d, i) => {
+        legendData.push({
+          name: d,
+          color: itemStyle.fill[i]
+        })
+      })
+      // 实例化图例
+      this.legend = new Legend(selector, legendData)
+    }
+  }
+
+  /**
+   *  渲染
+   *  @example: [
+   *    {
+   *     'name': '@cname', // 名称
+   *     'tongbi|1-100': 1, // 同比数据
+   *     'huanbi|1-100': 1 // 环比数据
+   *     'value|1-1000': 1 // 数值
+   *   }
+   *  ]
+   *  @param    {array}  data 图表数据
+   *  @return   {void}  void
+   */
+  render(data) {
+    const self = this
+    // 清除画布
+    // self.zr.clear()
+    // 获取value值
+    let tongbiData = [] // 同比数据
+    let huanbiData = [] // 环比数据
+    let trendData = [] // 趋势
+    self.data = data
+    data.map((d) => {  
+      tongbiData.push(d.tongbi)
+      huanbiData.push(d.huanbi)
+      trendData.push(d.trend)
+    })
+    // 获取所有value
+    let dataset = [...tongbiData, ...huanbiData]
+    // 同比环比取出来
+    let newData = [tongbiData, huanbiData]
+ 
+    // 渲染X轴
+    self.xScale = self.xAxis.render(data)
+    // 渲染Y轴
+    self.yScale = self.lYAxis.render(dataset)
+    // 数值比例尺
+    self.vScale = self.rYAxis.render(trendData) 
+    // 渲染矩形条  
+    self.drawRect(newData)
+    // 渲染折线
+    self.drawLine(trendData)
+  }
+
+  /**
+   *  画拆线
+   *  @param    {array}  data 图表数据
+   *  @return   {void}   void
+   */
+  drawLine(data) {
+    const self = this
+    const { itemStyle, yHeight } = self.config
+    const { left, top } = itemStyle.margin
+    let lines = [[], []]
+    let iconG = new zrender.Group()
+    data.map((d, i) => {
+      let x = self.xScale(i) + left
+      let y = yHeight - self.vScale(data[i]) + top + 10
+      if(y <= 0){
+        y = 0
+      }
+      // 实例化一个iamge
+      const icon = new zrender.Image({
+        z: 1,
+        style: {
+          image: iconUrl,
+          width: 20,
+          height: 20,
+          x: x - 10,
+          y: yHeight
+        }
+      })
+      // 动画
+      icon.animateTo({
+        style: {
+          y: y - 10
+        }
+      }, 350)
+      iconG.add(icon)
+      lines[0].push([x, yHeight])
+      lines[1].push([x, y])
+      icon
+        .on('mousemove', evt => {
+          /* addHover(el, style)将元素添加到高亮层。
+            添加到高亮层后，可以通过 removeHover 移除。
+          */
+          self.zr.addHover(icon, {
+            width: 25,
+            height: 25,
+            x: x - 12.5,
+            y: y - 12.5
+          })
+          let posi = {
+            x: evt.offsetX,
+            y: evt.offsetY - 60
+          }
+          let tipData = {
+            name: self.data[i].name,
+            values: [self.data[i].trend]
+          }
+          showTips(self.selector, tipData, posi) 
+        })
+        .on('mouseout', () => {
+          self.zr.removeHover(icon)
+          // 移出提示框
+          hideTips(self.selector)
+        })
+    })
+    // 实例化折线
+    const polyline = new zrender.Polyline({
+      z: 1,
+      cursor: 'default',
+      shape: {
+        points: lines[0],
+        smooth: '0'
+      },
+      style: {
+        stroke: '#ffce10',
+        fill: 'none',
+        lineWidth: 2
+      }
+    })
+    // 添加动画过渡
+    polyline.animateTo({
+      shape: {
+        points: lines[1]
+      }
+    }, 350)
+    // 添加拆线
+    self.zr.add(polyline)
+    // 添加icon图标
+    self.zr.add(iconG)
+  }
+
+  /**
+   * 矩形属性设置
+   * @param {array} data 图表数据
+   * @return   {void}  void
+   */
+  drawRect(data) {
+    const self = this
+    const { itemStyle, height } = self.config
+    const { fill, margin, width: iWidth } = itemStyle
+    const { left, bottom } = margin
+    const rectsG = new zrender.Group()
+    rectsG.position = [left, -bottom]
+    data.map((d, i) => {
+      d.map((v, j) => {
+        let h = self.yScale(v)
+        let rect = new zrender.Rect({
+          z: 1,
+          shape: {
+            width: iWidth,
+            height: 0,
+            x: self.xScale(j) - iWidth + i * iWidth,
+            y: height
+          },
+          style: {
+            fill: fill[i + 1]
+          }
+        })
+        // 添加动画
+        rect.animateTo({
+          shape: {
+            height: h,
+            y: height - h
+          }
+        }, 350)
+        // 元素更新之后
+        rect.afterUpdate({
+          shape: {
+            height: h,
+            y: height - h
+          }
+        })
+        // 添加到组元素中
+        rectsG.add(rect)
+        // 事件绑定
+        rect
+          .off('mousemove')
+          .off('mouseout')
+          .on('mousemove', (evt) => {
+            let posi = {
+              x: evt.offsetX,
+              y: evt.offsetY - 90
+            }
+            let tipData = {
+              name: self.data[j].name,
+              values: [`${self.data[j].tongbi}%`, `${self.data[j].huanbi}%`]
+            }
+            showTips(self.selector, tipData, posi) 
+          })
+          .on('mouseover', () => {
+            // 添加背景矩形
+            self.hoverRect = self.eventHoverRect(self.xScale(j) + iWidth * 2)
+            self.zr.add(self.hoverRect)
+          })
+          .on('mouseout', () => {
+            hideTips(self.selector)
+            self.zr.remove(self.hoverRect)
+          })
+      })
+    })
+    self.zr.add(rectsG)
+  }
+ 
+  /**
+   *  hover事件时候的的矩形背景
+   *  @param    {number}  x x坐标
+   *  @return   {object}  rect实例
+   */
+  eventHoverRect(x) {
+    const { itemStyle, yHeight } = this.config
+    const { width: iWidth, margin } = itemStyle
+    let hoverRect = new zrender.Rect({
+      z: 0,
+      cursor: 'default',
+      shape: {
+        width: iWidth * 3,
+        height: yHeight,
+        x: x,
+        y: margin.top
+      },
+      style: {
+        fill: '#000',
+        opacity: '0.2'
+      }
+    })
+    return hoverRect
+  }
+}

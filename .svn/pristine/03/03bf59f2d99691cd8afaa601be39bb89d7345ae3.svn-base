@@ -1,0 +1,195 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2017-09-21 08:56:13
+ * @Description: 添加轴线
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2017-09-21 08:56:13
+ */
+
+import d3 from 'd3'
+import zrender from 'zrender'
+
+export default class AddAxis {
+
+  /**
+   * Creates an instance of addAxis
+   * @param {object} zr zr容器
+   * @param {object} opt 配置项
+   */
+  constructor(zr, opt) {
+    this.zr = zr
+    this.config = opt
+  }
+
+  /**
+   *  渲染x轴
+   *  @param    {array}  data 图表数据
+   *  @return   {void}
+   */
+  renderXAxis(data) {
+    const self = this
+    const { itemStyle, height, xWidth } = self.config
+    const { left, bottom } = itemStyle.margin
+    const xAxisG = new zrender.Group()
+    xAxisG.position = [left, height - bottom]
+    const line = new zrender.Line({
+      shape: {
+        x1: 0,
+        x2: xWidth - left
+      },
+      style: {
+        stroke: '#454c72'
+      }
+    })
+    xAxisG.add(line)
+    // x轴比例尺
+    self.xScale = d3.scale.linear()
+      .domain([0, data.length])
+      .range([left, xWidth - left])
+
+    self.setXAxisText(data, xAxisG)
+    return self.xScale
+  }
+
+  /**
+   *  设置x轴文字属性
+   *  @param    {array}  data 数据
+   *  @param    {object}  xAxisG x轴g元素
+   *  @return   {void}
+   */
+  setXAxisText(data, xAxisG) {
+    const self = this
+    // const { margin } = self.config.itemStyle
+    data.map((d, i) => {
+      const text = new zrender.Text({
+        cursor: 'default',
+        style: {
+          text: d.name,
+          textAlign: 'center',
+          y: 5,
+          x: self.xScale(i),
+          textFill: '#fff',
+          opacity: 0
+        }
+      })
+      text.animateTo({
+        style: {
+          opacity: 1
+        }
+      }, 400)
+      xAxisG.add(text)
+    })  
+    self.zr.add(xAxisG)
+  }
+
+  /**
+   *  渲染Y轴
+   *  @param    {array}  data 图表数据
+   *  @return   {void}
+   */
+  renderYAxis(data) {
+    const self = this
+    const { yHeight, itemStyle } = self.config
+    const { left, bottom } = itemStyle.margin
+    // y轴比例尺
+    self.yScale = d3.scale.linear()
+      .domain([0, d3.max(data)])
+      .range([0, yHeight])
+
+    const yAxisG = new zrender.Group()
+    yAxisG.position = [0, yHeight]
+    // 添加y轴线
+    const line = new zrender.Line({
+      shape: {
+        x1: left,
+        x2: left,
+        y1: bottom,
+        y2: -yHeight + bottom
+      },
+      style: {
+        stroke: '#454c72'
+      }
+    })
+    yAxisG.add(line)  
+    self.setYAxisText(data, yAxisG)
+    self.zr.add(yAxisG)
+    return self.yScale   
+  }
+
+  /**
+   * 添加y轴文字
+   * @param {[type]} data   [description]
+   * @param {[type]} yAxisG [description]
+   */
+  setYAxisText(data, yAxisG) {
+    const self = this
+    const { yHeight, itemStyle } = self.config
+    const { left } = itemStyle.margin
+    let max = d3.max(data)
+    // 添加数据柱子上的文字
+    data.map((d, i) => {
+      const text = new zrender.Text({
+        cursor: 'default',
+        style: {
+          text: d,
+          textAlign: 'center',
+          y: -self.yScale(d),
+          x: self.xScale(i) + left,
+          textFill: '#fff',
+          opacity: 0
+        }
+      })
+      text.animateTo({
+        style: {
+          opacity: 1
+        }
+      }, 400)
+      yAxisG.add(text)
+    })
+
+    // 创建y轴文字
+    let ticks = [1, 2, 3, 4, 5]
+    ticks.map((d, i) => {
+      const text = new zrender.Text({
+        cursor: 'default',
+        style: {
+          text: parseInt(i * (max / ticks.length), 10),
+          textAlign: 'end',
+          y: -yHeight / ticks.length * i - 6,
+          x: 0,
+          textFill: '#fff',
+          opacity: 0
+        }
+      })
+      text.animateTo({
+        style: {
+          opacity: 1
+        }
+      }, 400)
+      yAxisG.add(text)
+      // 刻度线
+      const line = new zrender.Line({
+        shape: {
+          x1: left,
+          x2: left - 10,
+          y1: -yHeight / ticks.length * i,
+          y2: -yHeight / ticks.length * i
+        },
+        style: {
+          stroke: '#454c72'
+        }
+      })
+      yAxisG.add(line)
+    })  
+    self.zr.add(yAxisG)
+  }
+
+  /**
+   *  添加轴线
+   *  @example: [example]
+   */
+  // addYGridLine() {
+  //   const self = this
+
+  // }
+}

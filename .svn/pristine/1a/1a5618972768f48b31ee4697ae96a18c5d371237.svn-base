@@ -1,0 +1,717 @@
+// (function (global, factory) {
+
+// 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+// 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+// 	(factory((global.echarts = {})));
+// }(this, (function (exports) { 'use strict';})
+
+(function(global, factory){
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports):
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.hycharts = {})))
+})(this, function(exports) {  'use strict';
+
+    var dev;
+
+    // In browser
+    if (typeof window !== 'undefined') {
+        dev = window.__DEV__;
+    }
+    // In node
+    else if (typeof global !== 'undefined') {
+        dev = global.__DEV__;
+    }
+
+    if (typeof dev === 'undefined') {
+        dev = true;
+    }
+
+    var __DEV__ = dev;
+
+  var version = '1.0'
+  var dependencies = {
+    zrender: '4.0.1'
+  };
+  var version$1 = version
+  var idBase = new Date() - 0;
+  var DOM_ATTRIBUTE_KEY = '_hycharts_instance_';
+  var instances$1 = {};    // ZRender实例map索引
+  // 定义实例化对象
+  var instances = {};
+
+  /**
+   * Map eventType to actionType
+   * @type {Object}
+   */
+  var eventActionMap = {};
+
+  // 数组原型上的方法
+  var arrayProto = Array.prototype;
+  var nativeForEach = arrayProto.forEach;
+  // 一系列方法
+  /**
+   * 数组或对象遍历
+   * @memberOf module:zrender/core/util
+   * @param {Object|Array} obj
+   * @param {Function} cb
+   * @param {*} [context]
+   */
+  function each$1(obj, cb, context) {
+    if (!(obj && cb)) {
+        return;
+    }
+    if (obj.forEach && obj.forEach === nativeForEach) {
+        obj.forEach(cb, context);
+    }
+    else if (obj.length === +obj.length) {
+        for (var i = 0, len = obj.length; i < len; i++) {
+            cb.call(context, obj[i], i, obj);
+        }
+    }
+    else {
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                cb.call(context, obj[key], key, obj);
+            }
+        }
+    }
+  }
+
+  /**
+ * @memberOf module:zrender/core/util
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject$1(value) {
+    // Avoid a V8 JIT bug in Chrome 19-20.
+    // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+    var type = typeof value;
+    return type === 'function' || (!!value && type == 'object');
+}
+
+  var each = each$1;
+  var isObject = isObject$1;
+  function enableConnect(chart) {
+    var STATUS_PENDING = 0;
+    var STATUS_UPDATING = 1;
+    var STATUS_UPDATED = 2;
+    var STATUS_KEY = '__connectUpdateStatus';
+
+    function updateConnectedChartsStatus(charts, status) {
+        for (var i = 0; i < charts.length; i++) {
+            var otherChart = charts[i];
+            otherChart[STATUS_KEY] = status;
+        }
+    }
+
+    each(eventActionMap, function (actionType, eventType) {
+        chart._messageCenter.on(eventType, function (event) {
+            if (connectedGroups[chart.group] && chart[STATUS_KEY] !== STATUS_PENDING) {
+                if (event && event.escapeConnect) {
+                    return;
+                }
+
+                var action = chart.makeActionFromEvent(event);
+                var otherCharts = [];
+
+                each(instances, function (otherChart) {
+                    if (otherChart !== chart && otherChart.group === chart.group) {
+                        otherCharts.push(otherChart);
+                    }
+                });
+
+                updateConnectedChartsStatus(otherCharts, STATUS_PENDING);
+                each(otherCharts, function (otherChart) {
+                    if (otherChart[STATUS_KEY] !== STATUS_UPDATING) {
+                        otherChart.dispatchAction(action);
+                    }
+                });
+                updateConnectedChartsStatus(otherCharts, STATUS_UPDATED);
+            }
+        });
+    });
+}
+
+  /**
+ * zrender: 生成唯一id
+ *
+ * @author errorrik (errorrik@gmail.com)
+ */
+
+var idStart = 0x0907;
+
+var guid = function () {
+    return idStart++;
+};
+
+  /**
+ * @module zrender/ZRender
+ */
+/**
+ * @constructor
+ * @alias module:zrender/ZRender
+ * @param {string} id
+ * @param {HTMLElement} dom
+ * @param {Object} opts
+ * @param {string} [opts.renderer='canvas'] 'canvas' or 'svg'
+ * @param {number} [opts.devicePixelRatio]
+ * @param {number} [opts.width] Can be 'auto' (the same as null/undefined)
+ * @param {number} [opts.height] Can be 'auto' (the same as null/undefined)
+ */
+var ZRender = function (id, dom, opts) {
+
+  opts = opts || {};
+
+  /**
+   * @type {HTMLDomElement}
+   */
+  this.dom = dom;
+
+  /**
+   * @type {string}
+   */
+  this.id = id;
+
+  
+};
+ 
+
+
+var zrender = (Object.freeze || Object)({
+  version: version$1,
+  init: init$1,
+  dispose: dispose$1,
+  getInstance: getInstance,
+  registerPainter: registerPainter
+});
+
+  /**
+ * Initializing a zrender instance(初始化一个zrender)
+ * @param {HTMLElement} dom
+ * @param {Object} opts
+ * @param {string} [opts.renderer='canvas'] 'canvas' or 'svg'
+ * @param {number} [opts.devicePixelRatio]
+ * @param {number|string} [opts.width] Can be 'auto' (the same as null/undefined)
+ * @param {number|string} [opts.height] Can be 'auto' (the same as null/undefined)
+ * @return {module:zrender/ZRender}
+ */
+function init$1(dom, opts) {
+  var zr = new ZRender(guid(), dom, opts);
+  instances$1[zr.id] = zr;
+  console.log(zr)
+  return zr;
+}
+
+/**
+ * Dispose zrender instance
+ * @param {module:zrender/ZRender} zr
+ */
+function dispose$1(zr) {
+ 
+  if (zr) {
+      zr.dispose();
+  }
+ 
+  else {
+      for (var key in instances$1) {
+          if (instances$1.hasOwnProperty(key)) {
+              instances$1[key].dispose();
+          }
+      }
+      instances$1 = {};
+  }
+ 
+  return this;
+}
+
+/**
+ * @param {*} target
+ * @param {*} source
+ * @memberOf module:zrender/core/util
+ */
+function extend(target, source) {
+    for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+            target[key] = source[key];
+        }
+    }
+    return target;
+}
+
+function superCall(context, methodName) {
+    var args = slice(arguments, 2);
+    return this.superClass.prototype[methodName].apply(context, args);
+}
+
+function superApply(context, methodName, args) {
+    return this.superClass.prototype[methodName].apply(context, args);
+}
+
+/**
+ * 构造类继承关系
+ *
+ * @memberOf module:zrender/core/util
+ * @param {Function} clazz 源类
+ * @param {Function} baseClazz 基类
+ */
+function inherits(clazz, baseClazz) {
+    var clazzPrototype = clazz.prototype;
+    function F() {}
+    F.prototype = baseClazz.prototype;
+    clazz.prototype = new F();
+
+    for (var prop in clazzPrototype) {
+        clazz.prototype[prop] = clazzPrototype[prop];
+    }
+    clazz.prototype.constructor = clazz;
+    clazz.superClass = baseClazz;
+}
+
+/**
+ * Get zrender instance by id
+ * @param {string} id zrender instance id
+ * @return {module:zrender/ZRender}
+ */
+function getInstance(id) {
+  return instances$1[id];
+}
+
+function registerPainter(name, Ctor) {
+  painterCtors[name] = Ctor;
+}
+
+/**
+ * @memberOf module:zrender/core/util
+ * @param {boolean} condition
+ * @param {string} message
+ */
+function assert$1(condition, message) {
+    if (!condition) {
+        throw new Error(message);
+    }
+}
+
+  /**
+ * @module echarts~ECharts
+ */
+function HyCharts(dom, theme$$1, opts) {
+  opts = opts || {};
+
+  // Get theme by name
+  if (typeof theme$$1 === 'string') {
+      theme$$1 = themeStorage[theme$$1];
+  }
+
+  /**
+   * @type {string}
+   */
+  this.id;
+
+  /**
+   * Group id
+   * @type {string}
+   */
+  this.group;
+
+  /**
+   * @type {HTMLElement}
+   * @private
+   */
+  this._dom = dom;
+
+  var defaultRenderer = 'canvas';
+
+
+  /**
+   * @type {module:zrender/ZRender} 调用zrender 初始化，实例化canvas
+   * @private
+   */
+  var zr = this._zr = init$1(dom, {
+      renderer: opts.renderer || defaultRenderer,
+      devicePixelRatio: opts.devicePixelRatio,
+      width: opts.width,
+      height: opts.height
+  });
+  /**
+   * Expect 60 pfs.
+   * @type {Function}
+   * @private
+   */
+ // this._throttledZrFlush = throttle(bind(zr.flush, zr), 17);
+}
+
+
+  /**
+   * 
+   * @param {object} dom 节点
+   * @param {object} key  键名
+   * @param {object} value 键值
+   */
+  function setAttribute(dom, key, value) {
+    dom.setAttribute
+        ? dom.setAttribute(key, value)
+        : (dom[key] = value);
+  }
+
+    /**
+   * @param {HTMLElement} dom
+   * @param {Object} [theme]
+   * @param {Object} opts
+   * @param {number} [opts.devicePixelRatio] Use window.devicePixelRatio by default
+   * @param {string} [opts.renderer] Currently only 'canvas' is supported.
+   * @param {number} [opts.width] Use clientWidth of the input `dom` by default.
+   *                              Can be 'auto' (the same as null/undefined)
+   * @param {number} [opts.height] Use clientHeight of the input `dom` by default.
+   *                               Can be 'auto' (the same as null/undefined)
+   */
+  function init(dom, theme$$1, opts) {
+
+    var chart = new HyCharts(dom, theme$$1, opts);
+    chart.id = 'hyc_' + idBase++;
+     
+    instances[chart.id] = chart;
+
+    setAttribute(dom, DOM_ATTRIBUTE_KEY, chart.id);
+
+    enableConnect(chart);
+
+    return chart;
+  }
+
+  /**
+ * TERM EXPLANATIONS:
+ *
+ * [option]:
+ *
+ *     An object that contains definitions of components. For example:
+ *     var option = {
+ *         title: {...},
+ *         legend: {...},
+ *         visualMap: {...},
+ *         series: [
+ *             {data: [...]},
+ *             {data: [...]},
+ *             ...
+ *         ]
+ *     };
+ *
+ * [rawOption]:
+ *
+ *     An object input to echarts.setOption. 'rawOption' may be an
+ *     'option', or may be an object contains multi-options. For example:
+ *     var option = {
+ *         baseOption: {
+ *             title: {...},
+ *             legend: {...},
+ *             series: [
+ *                 {data: [...]},
+ *                 {data: [...]},
+ *                 ...
+ *             ]
+ *         },
+ *         timeline: {...},
+ *         options: [
+ *             {title: {...}, series: {data: [...]}},
+ *             {title: {...}, series: {data: [...]}},
+ *             ...
+ *         ],
+ *         media: [
+ *             {
+ *                 query: {maxWidth: 320},
+ *                 option: {series: {x: 20}, visualMap: {show: false}}
+ *             },
+ *             {
+ *                 query: {minWidth: 320, maxWidth: 720},
+ *                 option: {series: {x: 500}, visualMap: {show: true}}
+ *             },
+ *             {
+ *                 option: {series: {x: 1200}, visualMap: {show: true}}
+ *             }
+ *         ]
+ *     };
+ *
+ * @alias module:echarts/model/OptionManager
+ * @param {module:echarts/ExtensionAPI} api
+ */
+function OptionManager(api) {
+
+    /**
+     * @private
+     * @type {module:echarts/ExtensionAPI}
+     */
+    this._api = api;
+
+    /**
+     * @private
+     * @type {Array.<number>}
+     */
+    this._timelineOptions = [];
+
+    /**
+     * @private
+     * @type {Array.<Object>}
+     */
+    this._mediaList = [];
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    this._mediaDefault;
+
+    /**
+     * -1, means default.
+     * empty means no media.
+     * @private
+     * @type {Array.<number>}
+     */
+    this._currentMediaIndices = [];
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    this._optionBackup;
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    this._newBaseOption;
+}
+function enableClassExtend(RootClass, mandatoryMethods) {
+
+    RootClass.$constructor = RootClass;
+    RootClass.extend = function (proto) {
+
+        if (__DEV__) {
+            each$1(mandatoryMethods, function (method) {
+                if (!proto[method]) {
+                    console.warn(
+                        'Method `' + method + '` should be implemented'
+                        + (proto.type ? ' in ' + proto.type : '') + '.'
+                    );
+                }
+            });
+        }
+
+        var superClass = this;
+        var ExtendedClass = function () {
+            if (!proto.$constructor) {
+                superClass.apply(this, arguments);
+            }
+            else {
+                proto.$constructor.apply(this, arguments);
+            }
+        };
+
+        extend(ExtendedClass.prototype, proto);
+
+        ExtendedClass.extend = this.extend;
+        ExtendedClass.superCall = superCall;
+        ExtendedClass.superApply = superApply;
+        inherits(ExtendedClass, this);
+        ExtendedClass.superClass = superClass;
+
+        return ExtendedClass;
+    };
+}
+/**
+ * @alias module:echarts/model/Model
+ * @constructor
+ * @param {Object} option
+ * @param {module:echarts/model/Model} [parentModel]
+ * @param {module:echarts/model/Global} [ecModel]
+ */
+function Model(option, parentModel, ecModel) {
+    /**
+     * @type {module:echarts/model/Model}
+     * @readOnly
+     */
+    this.parentModel = parentModel;
+
+    /**
+     * @type {module:echarts/model/Global}
+     * @readOnly
+     */
+    this.ecModel = ecModel;
+
+    /**
+     * @type {Object}
+     * @protected
+     */
+    this.option = option;
+}
+// Enable Model.extend.
+enableClassExtend(Model);
+var OPTION_INNER_KEY = '\0_ec_inner';
+
+var GlobalModel = Model.extend({
+
+    constructor: GlobalModel,
+    
+    init: function (option, parentModel, theme, optionManager) {
+        theme = theme || {};
+        
+        this.option = null; // Mark as not initialized.
+
+        /**
+         * @type {module:echarts/model/Model}
+         * @private
+         */
+        this._theme = new Model(theme);
+
+        /**
+         * @type {module:echarts/model/OptionManager}
+         */
+        this._optionManager = optionManager;
+    },
+    setOption: function (option, optionPreprocessorFuncs) {
+        assert$1(
+            !(OPTION_INNER_KEY in option),
+            'please use chart.getOption()'
+        );
+        console.log(this._optionManager)
+        this._optionManager.setOption(option, optionPreprocessorFuncs);
+        
+        this.resetOption(null);
+    },
+    /**
+     * @param {string} type null/undefined: reset all.
+     *                      'recreate': force recreate all.
+     *                      'timeline': only reset timeline option
+     *                      'media': only reset media query option
+     * @return {boolean} Whether option changed.
+     */
+    resetOption: function (type) {
+        // setOption 执行第二步
+        var optionChanged = false;
+        var optionManager = this._optionManager;
+
+        if (!type || type === 'recreate') {
+            var baseOption = optionManager.mountOption(type === 'recreate');
+
+            if (!this.option || type === 'recreate') {
+                initBase.call(this, baseOption);
+            }
+            else {
+                this.restoreData();
+                this.mergeOption(baseOption);
+            }
+            optionChanged = true;
+        }
+
+        if (type === 'timeline' || type === 'media') {
+            this.restoreData();
+        }
+
+        if (!type || type === 'recreate' || type === 'timeline') {
+            var timelineOption = optionManager.getTimelineOption(this);
+            timelineOption && (this.mergeOption(timelineOption), optionChanged = true);
+        }
+
+        if (!type || type === 'recreate' || type === 'media') {
+            var mediaOptions = optionManager.getMediaOption(this, this._api);
+            if (mediaOptions.length) {
+                each$1(mediaOptions, function (mediaOption) {
+                    this.mergeOption(mediaOption, optionChanged = true);
+                }, this);
+            }
+        }
+
+        return optionChanged;
+    },
+    /**
+     * Get option for output (cloned option and inner info removed)
+     * @public
+     * @return {Object}
+     */
+    getOption: function () {
+        var option = clone(this.option);
+
+        each$1(option, function (opts, mainType) {
+            if (ComponentModel.hasClass(mainType)) {
+                var opts = normalizeToArray(opts);
+                for (var i = opts.length - 1; i >= 0; i--) {
+                    // Remove options with inner id.
+                    if (isIdInner(opts[i])) {
+                        opts.splice(i, 1);
+                    }
+                }
+                option[mainType] = opts;
+            }
+        });
+
+        delete option[OPTION_INNER_KEY];
+
+        return option;
+    },
+})
+/**
+ * @type {Array.<Function>}
+ * @inner
+ */
+var optionPreprocessorFuncs = [];
+// 原型
+var hychartsProto = HyCharts.prototype;
+  /**
+ * Usage:
+ * chart.setOption(option, notMerge, lazyUpdate);
+ * chart.setOption(option, {
+ *     notMerge: ...,
+ *     lazyUpdate: ...,
+ *     silent: ...
+ * });
+ *
+ * @param {Object} option
+ * @param {Object|boolean} [opts] opts or notMerge.
+ * @param {boolean} [opts.notMerge=false]
+ * @param {boolean} [opts.lazyUpdate=false] Useful when setOption frequently.
+ */
+hychartsProto.setOption = function (option, notMerge, lazyUpdate) {
+     
+    var silent;
+    if (isObject(notMerge)) {
+        lazyUpdate = notMerge.lazyUpdate;
+        silent = notMerge.silent;
+        notMerge = notMerge.notMerge;
+    }
+ 
+
+    if (!this._model || notMerge) {
+        var optionManager = new OptionManager(this._api);
+        var theme$$1 = this._theme;
+        var ecModel = this._model = new GlobalModel(null, null, theme$$1, optionManager);
+        ecModel.scheduler = this._scheduler;
+        ecModel.init(null, null, theme$$1, optionManager);
+    }
+    console.log(this._model)
+    this._model.setOption(option, optionPreprocessorFuncs);
+
+    if (lazyUpdate) {
+        this[OPTION_UPDATED] = {silent: silent};
+        this[IN_MAIN_PROCESS] = false;
+    }
+    else {
+        prepare(this);
+
+        updateMethods.update.call(this);
+
+        // Ensure zr refresh sychronously, and then pixel in canvas can be
+        // fetched after `setOption`.
+        this._zr.flush();
+
+        this[OPTION_UPDATED] = false;
+        this[IN_MAIN_PROCESS] = false;
+
+        flushPendingActions.call(this, silent);
+        triggerUpdatedEvent.call(this, silent);
+        
+    }
+
+    ///////// 20180128进展
+};
+
+  exports.version = version;
+  exports.init = init;
+})

@@ -1,0 +1,199 @@
+/*
+ * @Author: zhanghongqiao@hiynn.com 
+ * @Date: 2018-01-31 15:43:05 
+ * @Description: 玫瑰饼图
+ * @Last Modified by: zhanghongqiao@hiynn.com
+ * @Last Modified time: 2018-01-31 17:51:32
+ */
+import zrender from 'zrender'
+import d3 from 'd3'
+import { InitZr } from '../../util/initZr'
+import { Pie } from '../../util/shapes'
+import _ from 'lodash'
+import { showTips, hideTips } from './tips.js'
+
+export default class RosePie {
+  /**
+   * 饼图图默认配置项
+   * @return {object} 默认配置项
+   */
+  defaultSetting () {
+    return{
+      width: 500,
+      height: 500,
+      dur: 1000,
+      tooltip: {
+        show: true
+      },
+      itemStyle: {
+        colors: ['#C32F4B', '#6CC4A4', '#4D9DB4', '#E1514B', '#F47245', '#FB9F59', '#FEC574', 
+          '#FAE38C', '#EAF195', '#C7E89E', '#9CD6A4', '#9E0041', '#C32F4B', '#4776B4'],
+        margin: {
+          top: 6,
+          right: 110, 
+          bottom: 20,
+          left: 40
+        },
+        hover: {
+          fill: '#9CD6A4',
+          radius: 20
+        }
+      },
+      legend: {
+        radius: 6,
+        fontSize: 12,
+        fill: '#fff'
+      }
+    }
+  }
+  /**
+   * Creates an instance of RosePie
+   * @param {string} selector 容器元素选择器
+   * @param {object} opt 图表组件配置项
+   */
+  constructor(selector, opt) {
+    this.selector = selector
+    const defaultSetting = this.defaultSetting()
+    this.config = _.merge({}, defaultSetting, opt)
+    const { width, height } = this.config
+    this.zr = new InitZr(selector, width, height) 
+    // 圆弧组元素
+    this.pieGroup = new zrender.Group()
+    this.pieGroup.position = [width / 2, height / 2]
+    // 线条组元素
+    this.lineGroup = new zrender.Group()
+    this.lineGroup.position = [width / 2, height / 2]
+    // 初始化值定义（用于初始化调用方法）
+    this.isInit = true
+  }
+  
+  render(data) {
+    const self = this
+    const { width, height, itemStyle } = self.config
+    const { right } = itemStyle.margin
+    let radius = Math.min(width - right, height) / 2 - 20
+    let innerRadius = 0.2 * radius
+    itemStyle.radius = radius
+    itemStyle.innerRadius = innerRadius
+    let dataset = []
+
+    data.map((d) => dataset.push(d.value))
+    // 可以返回自然数，获取值大值，计算比例尺 返回 10 的 max.length 次幂。  
+    let pow = Math.pow(10, String(d3.max(dataset)).length)
+    itemStyle.pow = pow
+    self.pie = d3.layout.pie()
+      .sort(null)
+      .value((d) => d.value)
+
+    // 转换数据  
+    let pieData = self.pie(data)   
+    // 初始化组元素
+    if(this.isInit){
+      self.initGroup(pieData) 
+      this.isInit = false
+    }
+    // 渲染路径
+    self.setPieAttribute(pieData)  
+    // 渲染线条
+    self.setLineAttribute(pieData)
+  }
+
+  /**
+   * 初始化组元素
+   * @param  {array} data 图表数据
+   * @return {void}  void
+   */  
+  initGroup(data) {
+    data.map((d, i) => {
+      const { innerRadius, colors } = this.config.itemStyle
+      // 圆弧 
+      let pie = new Pie({
+        shape: {
+          cx: 0,
+          cy: 0,
+          innerRadius: innerRadius
+        },
+        style: {
+          fill: colors[i]
+        }
+      })
+      this.pieGroup.add(pie)
+      // 线条
+      let line = new zrender.Line()
+      this.lineGroup.add(line)
+    })
+    this.zr.add(this.lineGroup)
+    this.zr.add(this.pieGroup)
+  }
+
+  /**
+   * pie元素属性设置
+   * @param  {any} data 图表数据(使用pie方法转换后的)
+   * @return {void}  void
+   */
+  setPieAttribute(data) {
+    const { radius, innerRadius, pow } = this.config.itemStyle
+    this.pieGroup.eachChild((pie, i) => {
+      pie.attr({
+        data: data[i].data,
+        shape: {
+          innerRadius: innerRadius,
+          outerRadius: (radius - innerRadius) * (data[i].data.value / pow) + innerRadius
+        }
+      })
+      pie.animateTo({
+        shape: {
+          startAngle: data[i].startAngle,
+          endAngle: data[i].endAngle
+        }
+      })
+      // 事件绑定
+      pie.on('mousemove', evt => {
+        const $this = evt.target
+        // 获取位置
+        let posi = {
+          x: evt.offsetX,
+          y: evt.offsetY - 60
+        } 
+        // 显示提示框
+        showTips(this.selector, $this.data, posi)
+      })
+      pie.on('mouseover', evt => {
+        const $this = evt.target
+        $this.animateTo({
+          shape: {
+            outerRadius: $this.shape.outerRadius + 20
+          }
+        }, 200)
+      })
+      pie.on('mouseout', evt => {
+        const $this = evt.target
+        $this.animateTo({
+          shape: {
+            outerRadius: $this.shape.outerRadius - 20
+          }
+        })
+        hideTips(this.selector)
+      }, 200)
+    })
+  }
+
+  setLineAttribute(data) {
+    const { radius, innerRadius, pow } = this.config.itemStyle
+    this.lineGroup.eachChild((line, i) => {
+      let x = (radius - innerRadius) * (data[i].data.value / pow) + innerRadius
+      console.log(x)
+      line.attr({
+        shape: {
+          x1: x,
+          y1: x + 5,
+          x2: x + 30,
+          y2: x + 30
+        },
+        style: {
+          stroke: '#fff'
+        }
+      })
+    })
+  }
+}

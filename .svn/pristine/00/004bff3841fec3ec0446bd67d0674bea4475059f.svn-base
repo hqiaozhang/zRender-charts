@@ -1,0 +1,91 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2017-12-26 17:19:29
+ * @Description: 矩形图表
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2017-12-26 17:19:29
+ */
+
+import zrender from 'zrender'
+import _ from 'lodash'
+import AddAxis from './addAxis.js'
+
+export default class RectBar {
+    /**
+   * 地图默认配置项
+   * @return {object} 默认配置项
+   */
+  defaultSetting () {
+    return{
+      width: 600,
+      height: 600,
+      itemStyle: {
+        width: 20,
+        margin: {
+          top: 20,
+          right: 20,
+          bottom: 20,
+          left: 20
+        }
+      }
+    }  
+  }
+ 
+  /**
+   * Creates an instance of Heatmap
+   * @param {string} selector 容器元素选择器
+   * @param {object} opt 图表组件配置项
+   */
+  constructor(selector, opt) {
+    // 获取配置项
+    const defaultSetting = this.defaultSetting()
+    this.config = _.merge({}, defaultSetting, opt)
+    const { width, height, itemStyle } = this.config
+    const { top, right, bottom, left } = itemStyle.margin
+    this.config.xWidth = width - left - right
+    this.config.yHeight = height - top - bottom
+    this.zr = zrender.init(document.querySelector(selector), {
+      renderer: 'canavs',
+      width: width,
+      height: height
+    })
+    // 实例化坐标轴
+    this.addAxis = new AddAxis(this.zr, this.config)
+     
+  }
+  render(data) {
+    const self = this
+    let dataset = []
+    data.map(d => dataset.push(d.value))
+    // x轴
+    self.xScale = self.addAxis.renderXAxis(data)
+    // y轴
+    self.yScale = self.addAxis.renderYAxis(dataset)
+    self.setRect(dataset)    
+  }
+
+  setRect(data) {
+    const self = this
+    const { height, itemStyle } = self.config
+    const { bottom } = itemStyle.margin
+    const { width: iWidth } = itemStyle
+    const rectG = new zrender.Group()
+    rectG.position[1] = -bottom
+    data.map((d, i) => {
+      const rect = new zrender.Rect({
+        shape: {
+          r: 3,
+          x: self.xScale(i) + iWidth / 2,
+          y: height - self.yScale(d),
+          height: self.yScale(d),
+          width: 20
+        },
+        style: {
+          fill: 'hotPink'
+        }
+      })
+      rectG.add(rect)
+    })
+    self.zr.add(rectG)
+  }
+}

@@ -1,0 +1,6 @@
+dist
+node_modules
+webpack.*.js
+src/loader/common/scripts/*.js
+src/components/chinaMap
+src/charts/map/earth/*.js

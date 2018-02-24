@@ -1,0 +1,25 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2017-12-26 17:34:00
+ * @Description: Description
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2017-12-26 17:34:00
+ */
+import { fetch } from '@/util/request'
+import { RectBar } from '@/charts/index'
+
+export default class Charts {
+  /**
+   *  构造函数
+   */
+  constructor() {
+    this.rectBar = new RectBar('.rectbar')
+  }
+
+  render() {
+    const self = this
+    fetch('fetchCharts', data => {
+      self.rectBar.render(data)
+    })
+  }
+}

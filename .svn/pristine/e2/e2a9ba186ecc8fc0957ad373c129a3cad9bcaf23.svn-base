@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>图表库</title>
+</head>
+<body>
+<!-- <div id="earth" style="width: 800px; height: 600px;"></div> -->
+<div class="select-time"></div>
+<div class="rectbar"></div>
+<div class="map"></div>
+<div class="sameRingRation"></div>
+<div class="basePie"></div>
+
+</body>
+</html>

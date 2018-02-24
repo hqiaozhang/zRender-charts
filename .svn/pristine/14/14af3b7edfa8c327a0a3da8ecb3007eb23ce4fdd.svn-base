@@ -1,0 +1,93 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2017-09-21 08:56:13
+ * @Description: 添加轴线
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2017-09-21 08:56:13
+ */
+
+import d3 from 'd3'
+import zrender from 'zrender'
+
+export default class AddAxis {
+
+  /**
+   * Creates an instance of addAxis
+   * @param {object} zr zr容器
+   * @param {object} opt 配置项
+   */
+  constructor(zr, opt) {
+    this.zr = zr
+    this.config = opt
+  }
+
+  /**
+   *  渲染x轴
+   *  @param    {array}  data 图表数据
+   *  @return   {void}
+   */
+  renderXAxis(data) {
+    const self = this
+    const { itemStyle, height, xWidth } = self.config
+    const { left, bottom } = itemStyle.margin
+    const xAxisG = new zrender.Group()
+    xAxisG.position[0] = left
+    xAxisG.position[1] = height - bottom 
+    
+    const line = new zrender.Line({
+      shape: {
+        x1: 0,
+        x2: xWidth - left
+      },
+      style: {
+        stroke: '#454c72'
+      }
+    })
+    xAxisG.add(line)
+    // x轴比例尺
+    self.xScale = d3.scale.linear()
+      .domain([0, data.length])
+      .range([left, xWidth])
+
+    self.setXAxisText(data, xAxisG)
+    return self.xScale
+  }
+
+  /**
+   *  设置x轴文字属性
+   *  @param    {array}  text  text元素
+   *  @return   {void}
+   */
+  setXAxisText(data, xAxisG) {
+    const self = this
+    const { width: iWidth, margin } = self.config.itemStyle
+    data.map((d, i) => {
+      const text = new zrender.Text({
+        style: {
+          text: d.name,
+          textAlign: 'center',
+          x: self.xScale(i) + margin.left - iWidth / 2,
+          y: 5,
+          textFill: '#fff'
+        }
+      })
+      xAxisG.add(text)
+    })  
+    self.zr.add(xAxisG)
+  }
+
+  /**
+   *  渲染Y轴
+   *  @param    {array}  data 图表数据
+   *  @return   {void}
+   */
+  renderYAxis(data) {
+    const self = this
+    const { yHeight } = self.config
+    // y轴比例尺
+    self.yScale = d3.scale.linear()
+      .domain([0, d3.max(data)])
+      .range([0, yHeight])
+    return self.yScale   
+  }
+}

@@ -1,0 +1,19 @@
+/**
+ * @Author:      zhanghq
+ * @DateTime:    2017-12-26 17:20:15
+ * @Description: 图表汇总
+ * @Last Modified By:   zhanghq
+ * @Last Modified Time:    2017-12-26 17:20:15
+ */
+
+import RectBar from './bar/rectBar/'
+import BaseMap from './map/baseMap/'
+import BasePie from './pie/basePie/'
+import SameRingRation from './bar/sameRingRatio'
+ 
+export { 
+  RectBar,
+  BaseMap,
+  BasePie,
+  SameRingRation }
+

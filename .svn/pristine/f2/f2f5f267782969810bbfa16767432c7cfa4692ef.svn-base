@@ -1,0 +1,5 @@
+<ul class="legend">
+  {{#each this}}
+    <li><i><em></em></i>{{name}}</li>
+  {{/each}}
+</ul>

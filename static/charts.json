@@ -1,0 +1,265 @@
+[
+    {
+        "typeName": "柱状图",
+        "key": "bar",
+        "child": [
+            {
+                "name": "滑块柱状图",
+                "key": "sliderBar",
+                "imgUrl": "static/images/bar/sliderBar.png"
+            },
+            {
+                "name": "三角形柱状图",
+                "key": "triangleBar",
+                "imgUrl": "static/images/bar/triangleBar.png"
+            },
+            {
+                "name": "箭头柱状图",
+                "key": "arrowBar",
+                "imgUrl": "static/images/bar/arrowBar.png"
+            },
+            {
+                "name": "矩阵柱状图",
+                "key": "matrixBar",
+                "imgUrl": "static/images/bar/matrixBar.png"
+            },
+            {
+                "name": "六边形组合柱状图",
+                "key": "pointBar",
+                "imgUrl": "static/images/bar/pointBar.png"
+            },
+            {
+                "name": "不规则图表组合柱状图",
+                "key": "polygonBar",
+                "imgUrl": "static/images/bar/polygonBar.png"
+            },
+            {
+                "name": "尖角柱状图",
+                "key": "polygonBar2",
+                "imgUrl": "static/images/bar/polygonBar2.png"
+            },
+            {
+                "name": "矩形柱状图",
+                "key": "rectBar",
+                "imgUrl": "static/images/bar/rectBar.png"
+            },
+            {
+                "name": "三角形柱状图",
+                "key": "triangleBar",
+                "imgUrl": "static/images/bar/triangleBar.png"
+            },
+            {
+                "name": "矩形组合柱状图",
+                "key": "splitBar2",
+                "imgUrl": "static/images/bar/splitBar2.png"
+            },
+            {
+                "name": "顶部小圆点柱状图",
+                "key": "topCircleBar",
+                "imgUrl": "static/images/bar/topCircleBar.png"
+            },
+            {
+                "name": "横向小圆点组合柱状图",
+                "key": "dotBar",
+                "imgUrl": "static/images/bar/dotBar.png"
+            },
+            {
+                "name": "横向圆角渐变柱状图",
+                "key": "gradientBar",
+                "imgUrl": "static/images/bar/gradientBar.png"
+            },
+            {
+                "name": "横向图案组合柱状图",
+                "key": "iconBar",
+                "imgUrl": "static/images/bar/iconBar.png"
+            },
+            {
+                "name": "横向滑块组合柱状图",
+                "key": "sliderBar2",
+                "imgUrl": "static/images/bar/sliderBar2.png"
+            },
+            {
+                "name": "横向刻度柱状图",
+                "key": "splitBar",
+                "imgUrl": "static/images/bar/splitBar.png"
+            },
+            {
+                "name": "横向三角形柱状图",
+                "key": "triangleBar2",
+                "imgUrl": "static/images/bar/triangleBar2.png"
+            },
+            {
+                "name": "横向组合柱状图",
+                "key": "gradientProcessBar",
+                "imgUrl": "static/images/bar/gradientProcessBar.png"
+            }
+        ]
+    },
+    {
+        "typeName": "饼图",
+        "key": "pie",
+        "child": [
+            {
+                "name": "饼图",
+                "key": "pie",
+                "imgUrl": "static/images/pie/pie.gif"
+            },
+            {
+                "name": "3D饼图",
+                "key": "donut3d",
+                "imgUrl": "static/images/pie/donut3d.png"
+            },
+            {
+                "name": "玫瑰饼图",
+                "key": "rosePie",
+                "imgUrl": "static/images/pie/rosePie.png"
+            },
+            {
+                "name": "矩形组合饼图",
+                "key": "splitPie2",
+                "imgUrl": "static/images/pie/splitPie2.png"
+            },
+            {
+                "name": "箭头组合饼图",
+                "key": "splitPie",
+                "imgUrl": "static/images/pie/splitPie.png"
+            },
+            {
+                "name": "六边形饼图",
+                "key": "polygonPie",
+                "imgUrl": "static/images/pie/polygonPie.png"
+            },
+            {
+                "name": "进度条饼图",
+                "key": "progressPie",
+                "imgUrl": "static/images/pie/progressPie.png"
+            }
+
+            
+        ]
+    },
+    {
+        "typeName": "面积图",
+        "key": "area",
+        "child": [
+            {
+                "name": "面积图",
+                "key": "areaChart",
+                "imgUrl": "static/images/area/areaChart.png"
+            },
+            {
+                "name": "三角形渐变面积图",
+                "key": "gradientTriangle",
+                "imgUrl": "static/images/area/gradientTriangle.png"
+            },
+            {
+                "name": "三角形面积图",
+                "key": "triangle",
+                "imgUrl": "static/images/area/triangle.png"
+            },
+            {
+                "name": "水波纹面积图",
+                "key": "waveCharts",
+                "imgUrl": "static/images/area/waveCharts.gif"
+            }
+        ]
+    },
+    {
+        "typeName": "拆线图",
+        "key": "line",
+        "child": [
+            {
+                "name": "同环比拆线图",
+                "key": "lineChart",
+                "imgUrl": "static/images/line/lineChart.png"
+            }
+        ]
+    },
+    {
+        "typeName": "关系图",
+        "key": "force ",
+        "child": [
+            {
+                "name": "力导向图",
+                "key": "forceCharts",
+                "imgUrl": "static/images/force/forceCharts.png"
+            }
+        ]
+    },
+    {
+        "typeName": "地图",
+        "key": "map",
+        "child": [
+            {
+                "name": "地图",
+                "key": "map",
+                "imgUrl": "static/images/map/map.png"
+            }
+        ]
+    },
+    {
+        "typeName": "地图",
+        "key": "heatMap",
+        "child": [
+            {
+                "name": "热力图",
+                "key": "areaHeatMap",
+                "imgUrl": "static/images/heatMap/heatMap.png"
+            }
+        ]
+    },
+    {
+       "typeName": "雷达图",
+        "key": "radar",
+        "child": [
+            {
+                "name": "雷达图",
+                "key": "radar",
+                "imgUrl": "static/images/radar/radar.png"
+            }
+        ] 
+    },
+    {
+        "typeName": "树形图",
+        "key": "tree",
+        "child": [
+            {
+                "name": "树形图",
+                "key": "tree",
+                "imgUrl": "static/images/tree/tree.png"
+            },
+            {
+                "name": "地区树图",
+                "key": "tree1",
+                "imgUrl": "static/images/tree/tree1.gif"
+            }
+        ]
+    },
+    {
+        "typeName": "仪表盘",
+        "key": "gauge",
+        "child": [
+            {
+                "name": "速度仪表盘图",
+                "key": "speedDashBoard",
+                "imgUrl": "static/images/gauge/speedDashBoard.png"
+            },
+            {
+                "name": "仪表盘图",
+                "key": "dashboard1",
+                "imgUrl": "static/images/gauge/dashboard1.png"
+            }
+        ]
+    },
+    {
+        "typeName": "其他",
+        "key": "customize",
+        "child": [
+            {
+                "name": "柱状环绕圆",
+                "key": "polarCoordinates",
+                "imgUrl": "static/images/customize/polarCoordinates.png"
+            }
+        ]
+    }
+]

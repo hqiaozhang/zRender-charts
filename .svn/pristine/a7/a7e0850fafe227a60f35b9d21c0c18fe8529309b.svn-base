@@ -1,5 +1,0 @@
-<div class="charts-tooltip">
-    <p class="name">{{data.name}}</p>
-    <p class="tongbi">{{data.tongbi}}</p>
-    <p class="huanbi">{{data.huanbi}}</p>
-</div>

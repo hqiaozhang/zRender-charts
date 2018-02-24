@@ -1,3 +1,0 @@
-{{#each this}}
-  <li><i></i><button>{{this}}</button></li>
-{{/each}}
